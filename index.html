@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Test Project - Top Level</title>
+</head>
+<body>
+    <h1>Test Project - Top Level Page</h1>
+
+    <!-- Outermost iframe (no speaker-selection in allow attribute) -->
+    <iframe src="outer-iframe.html"
+            style="width: 100%; height: 600px; border: 2px solid black;"
+            sandbox="allow-forms allow-scripts allow-same-origin"
+            allow="geolocation; autoplay; microphone; camera;">
+    </iframe>
+
+    <p>
+        The inner iframe will attempt to use <code>setSinkId()</code>.<br>
+        Due to the Permissions Policy in the outer iframe, <code>setSinkId()</code> should fail in Firefox.
+    </p>
+</body>
+</html>

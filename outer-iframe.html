@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Test Project - Outer Iframe</title>
+</head>
+<body>
+    <h2>Outer Iframe</h2>
+    <p>This iframe does <strong>not</strong> include <code>speaker-selection</code> in its <code>allow</code> attribute.</p>
+
+    <!-- Inner iframe (includes speaker-selection) -->
+    <iframe src="inner-iframe.html"
+            style="width: 100%; height: 500px; border: 1px solid blue;"
+            sandbox="allow-scripts allow-same-origin"
+            allow="microphone; camera; speaker-selection;">
+    </iframe>
+</body>
+</html>

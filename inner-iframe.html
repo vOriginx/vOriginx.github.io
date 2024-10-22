@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Test Project - Inner Iframe</title>
+</head>
+<body>
+    <h2>Inner Iframe: Audio Output Test</h2>
+    <p>
+        This iframe includes <code>speaker-selection</code> in its <code>allow</code> attribute and will attempt to use <code>setSinkId()</code>.
+    </p>
+
+    <button id="play-audio">Play Audio and Set Default Output Device</button>
+    <button id="stop-audio">Stop Audio</button>
+    <ul id="device-list"></ul>
+
+    <script>
+        async function requestMediaPermissions() {
+            try {
+                await navigator.mediaDevices.getUserMedia({ audio: true });
+                console.log('Microphone access granted.');
+                await enumerateDevices();
+            } catch (error) {
+                console.error('Error accessing microphone:', error);
+            }
+        }
+
+        async function enumerateDevices() {
+            try {
+                const devices = await navigator.mediaDevices.enumerateDevices();
+                const audioOutputDevices = devices.filter(device => device.kind === 'audiooutput');
+
+                const deviceList = document.getElementById('device-list');
+                deviceList.innerHTML = '';
+
+                if (audioOutputDevices.length > 0) {
+                    audioOutputDevices.forEach(device => {
+                        const listItem = document.createElement('li');
+                        listItem.textContent = 'Device: ' + (device.label || 'Unnamed') + ', ID: ' + device.deviceId;
+                        deviceList.appendChild(listItem);
+                    });
+
+                    return audioOutputDevices[0].deviceId;
+                } else {
+                    const listItem = document.createElement('li');
+                    listItem.textContent = 'No audio output devices found.';
+                    deviceList.appendChild(listItem);
+                    return null;
+                }
+            } catch (error) {
+                console.error('Error enumerating devices:', error);
+                return null;
+            }
+        }
+
+        const audioElement = new Audio('https://www2.cs.uic.edu/~i101/SoundFiles/BabyElephantWalk60.wav');
+
+        document.getElementById('play-audio').addEventListener('click', async () => {
+            try {
+                // Request microphone access and enumerate devices
+                await requestMediaPermissions();
+
+                // Play the audio
+                await audioElement.play();
+                console.log('Audio is playing...');
+
+                // Attempt to set the audio output device
+                const defaultDeviceId = await enumerateDevices();
+                if (defaultDeviceId && typeof audioElement.setSinkId === 'function') {
+                    await audioElement.setSinkId(defaultDeviceId);
+                    console.log('Audio output device set successfully.');
+                } else {
+                    console.log('setSinkId is not supported or no device available.');
+                }
+            } catch (error) {
+                console.error('Error playing audio or setting device:', error.message);
+            }
+        });
+
+        document.getElementById('stop-audio').addEventListener('click', () => {
+            audioElement.pause();
+            audioElement.currentTime = 0;
+            console.log('Audio has been stopped.');
+        });
+    </script>
+</body>
+</html>
