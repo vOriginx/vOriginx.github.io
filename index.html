@@ -1,22 +1,27 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Test Project - Top Level</title>
-</head>
-<body>
-    <h1>Test Project - Top Level Page</h1>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Permissions Policy Test - Top Level</title>
+  </head>
+  <body>
+    <h1>Permissions Policy Test - Top Level Page</h1>
 
-    <!-- Outermost iframe (no speaker-selection in allow attribute) -->
-    <iframe src="outer-iframe.html"
-            style="width: 100%; height: 600px; border: 2px solid black;"
-            sandbox="allow-forms allow-scripts allow-same-origin"
-            allow="geolocation; autoplay; microphone; camera;">
+    <!-- Outer iframe (no speaker-selection in allow attribute) -->
+    <iframe
+      src="outer-iframe.html"
+      style="width: 100%; height: 600px; border: 2px solid black"
+      sandbox="allow-scripts allow-same-origin"
+      allow="geolocation; microphone; camera; autoplay;"
+    >
     </iframe>
 
     <p>
-        The inner iframe will attempt to use <code>setSinkId()</code>.<br>
-        Due to the Permissions Policy in the outer iframe, <code>setSinkId()</code> should fail in Firefox.
+      The inner iframe will attempt to use <code>setSinkId()</code>.<br />
+      Due to the absence of <code>speaker-selection</code> in the outer iframe's
+      <code>allow</code> attribute, <code>setSinkId()</code> should fail in
+      browsers that enforce the Permissions Policy via the iframe's
+      <code>allow</code> attribute.
     </p>
-</body>
+  </body>
 </html>
