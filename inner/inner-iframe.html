@@ -10,10 +10,10 @@
     <select id="audio-output-select">
       <option value="">-- Select a device --</option>
     </select>
-    <br><br>
+    <br /><br />
     <button id="play-audio">Play Audio</button>
     <button id="stop-audio">Stop Audio</button>
-    <ul id="device-list" style="display: none;"></ul>
+    <ul id="device-list" style="display: none"></ul>
 
     <script>
       async function requestMediaPermissions() {
@@ -35,7 +35,8 @@
           );
 
           const selectElement = document.getElementById('audio-output-select');
-          selectElement.innerHTML = '<option value="">-- Select a device --</option>';
+          selectElement.innerHTML =
+            '<option value="">-- Select a device --</option>';
 
           if (audioOutputDevices.length > 0) {
             audioOutputDevices.forEach((device) => {
@@ -56,42 +57,49 @@
         'https://www2.cs.uic.edu/~i101/SoundFiles/BabyElephantWalk60.wav'
       );
 
-      document.getElementById('play-audio').addEventListener('click', async () => {
-        try {
-          if (
-            navigator.mediaDevices &&
-            typeof navigator.mediaDevices.getUserMedia === 'function'
-          ) {
-            const selectedDeviceId = document.getElementById('audio-output-select').value;
-            await audioElement.setSinkId(selectedDeviceId);
-            if (selectedDeviceId) {
-              if (typeof audioElement.setSinkId === 'function') {
+      document
+        .getElementById('play-audio')
+        .addEventListener('click', async () => {
+          try {
+            if (
+              navigator.mediaDevices &&
+              typeof navigator.mediaDevices.getUserMedia === 'function'
+            ) {
+              const selectedDeviceId = document.getElementById(
+                'audio-output-select'
+              ).value;
+
+              if (selectedDeviceId) {
                 try {
                   await audioElement.setSinkId(selectedDeviceId);
                   console.log('Audio output device set successfully.');
                 } catch (error) {
                   console.error('Error setting sink ID:', error);
-                  alert('Error setting audio output device. Audio will play using the default device.');
+                  alert(
+                    'Error setting audio output device. Audio will play using the default device.'
+                  );
                 }
               } else {
-                console.log('setSinkId() is not supported in this browser.');
-                alert('Your browser does not support changing the audio output device programmatically.');
+                console.log(
+                  'No audio output device selected. Using default device.'
+                );
+                alert(
+                  'No audio output device selected. Audio will play using the default device.'
+                );
               }
-            } else {
-              console.log('No audio output device selected. Using default device.');
-              alert('No audio output device selected. Audio will play using the default device.');
-            }
 
-            await audioElement.play();
-          } else {
-            console.error('navigator.mediaDevices.getUserMedia is not available.');
-            alert('Media devices API is not available in your browser.');
+              await audioElement.play();
+            } else {
+              console.error(
+                'navigator.mediaDevices.getUserMedia is not available.'
+              );
+              alert('Media devices API is not available in your browser.');
+            }
+          } catch (error) {
+            console.error('Error playing audio or setting device:', error);
+            alert('An error occurred while trying to play audio.');
           }
-        } catch (error) {
-          console.error('Error playing audio or setting device:', error);
-          alert('An error occurred while trying to play audio.');
-        }
-      });
+        });
 
       document.getElementById('stop-audio').addEventListener('click', () => {
         audioElement.pause();
@@ -108,7 +116,9 @@
           await requestMediaPermissions();
           await populateAudioOutputDevices();
         } else {
-          console.error('navigator.mediaDevices.getUserMedia is not available.');
+          console.error(
+            'navigator.mediaDevices.getUserMedia is not available.'
+          );
           alert('Media devices API is not available in your browser.');
         }
       })();
