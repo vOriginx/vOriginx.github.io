@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Inner Iframe</title>
+  </head>
+  <body>
+    <h2>Inner Iframe: Audio Output Test</h2>
+    <button id="play-audio">Play Audio and Set Output Device</button>
+    <button id="stop-audio">Stop Audio</button>
+    <ul id="device-list"></ul>
+
+    <script>
+      function isFirefox() {
+        return navigator.userAgent.toLowerCase().includes('firefox');
+      }
+
+      async function requestMediaPermissions() {
+        try {
+          await navigator.mediaDevices.getUserMedia({ audio: true });
+          console.log('Microphone access granted.');
+        } catch (error) {
+          console.error('Error accessing microphone:', error);
+        }
+      }
+
+      async function enumerateDevices() {
+        try {
+          const devices = await navigator.mediaDevices.enumerateDevices();
+          console.log('Devices:', devices);
+
+          const audioOutputDevices = devices.filter(
+            (device) => device.kind === 'audiooutput'
+          );
+
+          const deviceList = document.getElementById('device-list');
+          deviceList.innerHTML = '';
+
+          if (audioOutputDevices.length > 0) {
+            audioOutputDevices.forEach((device) => {
+              const listItem = document.createElement('li');
+              listItem.textContent = `Device: ${
+                device.label || 'Unnamed'
+              }, ID: ${device.deviceId}`;
+              deviceList.appendChild(listItem);
+            });
+            // Return the first audio output device ID
+            return audioOutputDevices[0].deviceId;
+          } else {
+            console.error('No audio output devices found.');
+            return null;
+          }
+        } catch (error) {
+          console.error('Error enumerating devices:', error);
+          return null;
+        }
+      }
+
+      const audioElement = new Audio(
+        'https://www2.cs.uic.edu/~i101/SoundFiles/BabyElephantWalk60.wav'
+      );
+
+      document
+        .getElementById('play-audio')
+        .addEventListener('click', async () => {
+          try {
+            if (
+              navigator.mediaDevices &&
+              typeof navigator.mediaDevices.getUserMedia === 'function'
+            ) {
+              await requestMediaPermissions();
+
+              if (isFirefox()) {
+                if (
+                  typeof navigator.mediaDevices.selectAudioOutput === 'function'
+                ) {
+                  // Use selectAudioOutput() in Firefox
+                  try {
+                    const audioOutput =
+                      await navigator.mediaDevices.selectAudioOutput();
+                    console.log('Selected audio output device:', audioOutput);
+
+                    if (typeof audioElement.setSinkId === 'function') {
+                      console.log('setSinkId() is available');
+                      await audioElement.setSinkId(audioOutput.deviceId);
+                      console.log('Audio output device set successfully.');
+                    } else {
+                      console.log('setSinkId() is not supported.');
+                    }
+
+                    await audioElement.play();
+                  } catch (error) {
+                    console.error(
+                      'Error using selectAudioOutput() in Firefox:',
+                      error
+                    );
+
+                    console.info('Playing audio on default device:');
+
+                    await audioElement.play();
+                  }
+                } else {
+                  console.log(
+                    'selectAudioOutput() is not supported in this version of Firefox.'
+                  );
+
+                  console.info('Playing audio on default device:');
+
+                  await audioElement.play();
+                }
+              } else {
+                // Logic for other browsers (e.g., Chrome)
+                if (typeof audioElement.setSinkId === 'function') {
+                  const defaultDeviceId = await enumerateDevices();
+
+                  if (defaultDeviceId) {
+                    try {
+                      await audioElement.setSinkId(defaultDeviceId);
+                      console.log('Audio output device set successfully.');
+                    } catch (error) {
+                      console.error('Error setting sink ID:', error);
+                    }
+                  }
+                  await audioElement.play();
+                } else {
+                  console.log('setSinkId() is not supported.');
+                }
+              }
+            } else {
+              console.error(
+                'navigator.mediaDevices.getUserMedia is not available.'
+              );
+            }
+          } catch (error) {
+            console.error('Error playing audio or setting device:', error);
+          }
+        });
+
+      document.getElementById('stop-audio').addEventListener('click', () => {
+        audioElement.pause();
+        audioElement.currentTime = 0;
+        console.log('Audio has been stopped.');
+      });
+    </script>
+  </body>
+</html>

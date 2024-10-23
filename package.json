@@ -1,12 +1,20 @@
 {
   "name": "permissions-issue",
   "version": "1.0.0",
-  "description": "",
+  "description": "Cross-origin iframe test project",
   "main": "index.js",
   "scripts": {
-    "start": "http-server -c-1"
+    "start:parent": "cross-env PORT=8000 node parent/server.js",
+    "start:outer": "cross-env PORT=8001 node outer/server.js",
+    "start:inner": "cross-env PORT=8002 node inner/server.js",
+    "start": "concurrently \"npm run start:parent\" \"npm run start:outer\" \"npm run start:inner\""
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC"
+  "author": "Adam Nicholas",
+  "license": "ISC",
+  "devDependencies": {
+    "concurrently": "^9.0.1",
+    "cross-env": "^7.0.3",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.1"
+  }
 }

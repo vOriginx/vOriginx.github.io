@@ -1,27 +1,80 @@
 <!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <title>Permissions Policy Test - Top Level</title>
-  </head>
-  <body>
-    <h1>Permissions Policy Test - Top Level Page</h1>
+<html>
+<head>
+    <title>Audio Output Device Selector</title>
+</head>
+<body>
+    <h1>Select Audio Output Device</h1>
+    <button id="get-devices">Get Audio Output Devices</button>
+    <br><br>
+    <label for="audio-output">Choose an audio output device:</label>
+    <select id="audio-output"></select>
+    <br><br>
+    <audio id="audio" controls>
+        <source src="your-audio-file.mp3" type="audio/mpeg">
+        Your browser does not support the audio element.
+    </audio>
+    <p id="output-info"></p>
 
-    <!-- Outer iframe (no speaker-selection in allow attribute) -->
-    <iframe
-      src="outer-iframe.html"
-      style="width: 100%; height: 600px; border: 2px solid black"
-      sandbox="allow-scripts allow-same-origin"
-      allow="geolocation; microphone; camera; autoplay;"
-    >
-    </iframe>
+    <script>
+        async function getAudioOutputDevices() {
+            try {
+                // Check if the browser supports the required APIs
+                if (!('mediaDevices' in navigator) || !('enumerateDevices' in navigator.mediaDevices)) {
+                    alert('Your browser does not support enumerateDevices.');
+                    return;
+                }
 
-    <p>
-      The inner iframe will attempt to use <code>setSinkId()</code>.<br />
-      Due to the absence of <code>speaker-selection</code> in the outer iframe's
-      <code>allow</code> attribute, <code>setSinkId()</code> should fail in
-      browsers that enforce the Permissions Policy via the iframe's
-      <code>allow</code> attribute.
-    </p>
-  </body>
+                // Request permission to access media devices to get device labels
+                await navigator.mediaDevices.getUserMedia({ audio: true });
+
+                // Get the list of media devices
+                const devices = await navigator.mediaDevices.enumerateDevices();
+
+                // Filter for audio output devices
+                const audioOutputDevices = devices.filter(device => device.kind === 'audiooutput');
+
+                // Populate the select element with the devices
+                const select = document.getElementById('audio-output');
+                select.innerHTML = ''; // Clear any existing options
+
+                audioOutputDevices.forEach(device => {
+                    const option = document.createElement('option');
+                    option.value = device.deviceId;
+                    option.text = device.label || `Device ${device.deviceId}`;
+                    select.appendChild(option);
+                });
+
+                // Show the select element
+                select.style.display = 'inline-block';
+
+            } catch (err) {
+                console.error('Error getting audio output devices:', err);
+                alert('An error occurred while getting the audio output devices.');
+            }
+        }
+
+        async function setAudioOutput() {
+            const select = document.getElementById('audio-output');
+            const deviceId = select.value;
+            const audio = document.getElementById('audio');
+
+            if (typeof audio.setSinkId === 'undefined') {
+                alert('Your browser does not support output device selection.');
+                return;
+            }
+
+            try {
+                await audio.setSinkId(deviceId);
+                document.getElementById('output-info').textContent = `Output device set to: ${select.options[select.selectedIndex].text}`;
+            } catch (err) {
+                console.error('Error setting audio output device:', err);
+                alert('An error occurred while setting the audio output device.');
+            }
+        }
+
+        document.getElementById('get-devices').addEventListener('click', getAudioOutputDevices);
+        document.getElementById('audio-output').addEventListener('change', setAudioOutput);
+    </script>
+</body>
 </html>

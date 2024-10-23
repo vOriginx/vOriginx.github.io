@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Parent Page (Iframe Permissions Test)</title>
+  </head>
+  <body>
+    <h1>Parent Page</h1>
+
+    <!-- Outer iframe with necessary allow attributes -->
+    <iframe
+      src="https://outer.local:8001/outer-iframe.html"
+      style="width: 100%; height: 600px; border: 2px solid black"
+      allow="microphone; camera; speaker-selection;"
+      sandbox="allow-scripts allow-same-origin allow-modals allow-forms allow-popups"
+    >
+    </iframe>
+  </body>
+</html>
