@@ -1,3 +1,17 @@
+## The Issue
+
+In our Zendesk integration involving nested iframes that play audio through a user-selected output device, we faced challenges with implementing `setSinkId()` due to browser limitations with Firefox, cross-origin iframe restrictions, and permissions policies. 
+
+We were essentially calling `setSinkId()` without having the necessary permissions to do so in the context of the cross-origin (child) iframe.
+
+To resolve this, we ensured all iframes included the necessary allow attributes (e.g., `allow="microphone; speaker-selection;"`) - This solution successfully enabled audio output device selection.
+
+## Setup
+
+```
+npm i
+```
+
 Please add the following to your /etc/hosts file (MacOS):
 
 ```
@@ -6,30 +20,29 @@ Please add the following to your /etc/hosts file (MacOS):
 127.0.0.1   inner.local
 ```
 
-You can use `sudo nano /etc/hosts` to edit the file.
+You can use `sudo nano /etc/hosts` to edit the file or simple run this command:
 
-Then use `npm start` to start all servers.
+```
+echo -e "127.0.0.1\tparent.local\n127.0.0.1\touter.local\n127.0.0.1\tinner.local" | sudo tee -a /etc/hosts
+```
+
+This enables a HTTPS environment to better replicate the issue.
+
+You can use `npm start` to start all servers.
 
 The project should be available at https://parent.local:8000
 
-You can see in the console that the devices cannot be enumerated/setSinkId is not available for use. Hence the issues we have in Zendesk.
-
-Testing the permissions:
+## Testing the permissions:
 
 You can add `speaker-selection` into the `allow` attribute in both iframes to test working policies.
+If you remove the `speaker-selection` from one of the iframes you can restart and test again, you'll notice:
+- No output devices were retrieved (blocked by `speaker-selection` policy https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/enumerateDevices)
+- When clicking 'Play Audio', you see the DOMException in the console: `DOMException: Document's Permissions Policy does not allow setSinkId()`
 
-Testing the differences in Chrome vs Firefox:
-
-Chrome:
-
-`chrome://flags/` -> We need to enable `Insecure origins treated as secure` and relaunch before testing.
-
-Firefox:
+When adding `speaker-selection` in the `allow` attribute of both parent + child iframes, everything works.
 
 
-`about:config` -> `media.getusermedia.insecure.enabled` & `media.devices.insecure.enabled` need to be enabled before testing.
-
-Generating new keys
+## Generating new keys
 
 ```
 brew install mkcert

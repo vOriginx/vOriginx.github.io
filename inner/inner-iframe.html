@@ -69,22 +69,13 @@
                 'audio-output-select'
               ).value;
 
-              if (selectedDeviceId) {
-                try {
-                  await audioElement.setSinkId(selectedDeviceId);
-                  console.log('Audio output device set successfully.');
-                } catch (error) {
-                  console.error('Error setting sink ID:', error);
-                  alert(
-                    'Error setting audio output device. Audio will play using the default device.'
-                  );
-                }
-              } else {
-                console.log(
-                  'No audio output device selected. Using default device.'
-                );
+              try {
+                await audioElement.setSinkId(selectedDeviceId);
+                console.log('Audio output device set successfully.');
+              } catch (error) {
+                console.error('Error setting sink ID:', error);
                 alert(
-                  'No audio output device selected. Audio will play using the default device.'
+                  'Error setting audio output device. Audio will play using the default device.'
                 );
               }
 
